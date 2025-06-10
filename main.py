@@ -14,13 +14,8 @@ ______________
 
 """
 
-import subprocess
+
 import mysql.connector as m
-
-
-# Import database at start
-with open('custom_database.sql', 'r') as f:
-    subprocess.run(['mysql', '-u', 'root', '-proot', 'trainreservation'], stdin=f)
 
 connector= m.connection(host="localhost", user="root", password="root", database="trainreservation")
 con_cursor = connector.cursor()
@@ -45,7 +40,9 @@ def register():
     print(f"User ID {user_id} registered successfully with system ID {sys_ID}.")
     
     connector.commit()
-    
+
+
+#Login function to authenticate user  
 def login():
     connector= m.connection(host="localhost",user="root",password="root",database="trainreservation")
     con_cursor = connector.cursor()
@@ -67,10 +64,12 @@ def login():
         print("If you are a new user, please register first.")
         print("if you have forgotten your pwd or user ID please forget password or user ID option")
         print("\n\n")
-        wrong_pwd = 1
+    
         
         return None
-    if wrong_pwd == 1:
+    #if login is unsuccessful, try again
+    if con_cursor.fetchone() is None:
+
         print("1. Register as a new user")
         print("2. Login with existing user ID")
         print("3. forgot password or user ID")
@@ -89,8 +88,52 @@ def login():
             else:
                 print("No user found with the given phone number or system ID.")
                 print("Please try again or register as a new user.")
+                ask = input("Do you want to register as a new user? (yes/no): ")
+                if ask.lower() == 'yes':
+                    register()
+                else:
+                    print("Thank you for using the Train Reservation System. Goodbye!")
+ 
+ 
+def searchtrain():
+    #dict contianing weekdays
+    week_days = {"m": "monday", "t": "tuesday", "w": "wednesday", "th":"thrushday", "f" : "friday", "s": "saturday", "su":"Sunday"}
+    # Function to search for trains based on user input
+    print("Search for trains")
+    print("enter starting station")
+    start_station = input("Enter starting station: ")
+    print("enter destination station")
+    dest_station = input("Enter destination station: ") 
+    print("enter day of travel")
+    
+    travel_day = input(f"Enter day of travel \n{week_days}\n: ")  
+    con_cursor.execute("SELECT * FROM train_details WHERE start_station = %s AND dest_station = %s AND travel_date = %s", (start_station, dest_station, travel_day))
+    trains = con_cursor.fetchall()
+    print("_____Available trains_____")
+    print(trains)  
+ 
+    
+#User panel
+def user_panel():
+    print("_________ Welcome to the Train Reservation System _________")
+        
+    print("1. Login to your account")
+    print("2. Register as a new user")
+    print("3. Exit")
+    op = int(input("Enter your choice: "))
+    if op == 1:
+        user_id = login()
+        if user_id:
+            print(f"Welcome {user_id} to the Train Reservation System!")
+            # Call other functions like searchtrain(), bookTicket(), etc.
+    elif op == 2:
+        register()
+    elif op == 3:
+        print("Thank you for using the Train Reservation System. Goodbye!")
+        exit()
+    else:
+        print("Invalid choice. Please try again.")
+        user_panel()
+        
     
     
-# Export database at end
-with open('custom_database.sql', 'w') as f:
-    subprocess.run(['mysqldump', '-u', 'root', '-proot', 'trainreservation'], stdout=f)
