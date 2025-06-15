@@ -1,0 +1,42 @@
+-- 1. Create the database
+CREATE DATABASE IF NOT EXISTS trainreservation;
+USE trainreservation;
+
+-- 2. Create user_details table (for user accounts)
+CREATE TABLE IF NOT EXISTS user_details (
+    sys_id INT PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL UNIQUE,
+    phone_no VARCHAR(15) NOT NULL,
+    password VARCHAR(100) NOT NULL
+);
+
+-- 3. Create train_details table (for train information)
+CREATE TABLE IF NOT EXISTS train_details (
+    train_no INT PRIMARY KEY,
+    train_name VARCHAR(100) NOT NULL,
+    start_station VARCHAR(50) NOT NULL,
+    dest_station VARCHAR(50) NOT NULL,
+    departure_time TIME NOT NULL,
+    arrival_time TIME NOT NULL,
+    running_days VARCHAR(100) NOT NULL COMMENT 'Comma-separated days (e.g., Monday,Wednesday,Friday)',
+    ac1_fare DECIMAL(10,2) NOT NULL,
+    sl_fare DECIMAL(10,2) NOT NULL,
+    gen_fare DECIMAL(10,2) NOT NULL,
+    status VARCHAR(20) DEFAULT 'Active'
+);
+
+-- 4. Create booked_tickets table (for reservations)
+CREATE TABLE IF NOT EXISTS booked_tickets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL,
+    PNR INT NOT NULL,
+    train_no INT NOT NULL,
+    passenger_name VARCHAR(100) NOT NULL,
+    age INT NOT NULL,
+    gender CHAR(1) NOT NULL,
+    fare DECIMAL(10,2) NOT NULL,
+    class VARCHAR(10) NOT NULL COMMENT 'AC/SL/GEN',
+    status VARCHAR(20) DEFAULT 'Confirmed',
+    booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (train_no) REFERENCES train_details(train_no)
+);
