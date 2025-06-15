@@ -143,11 +143,13 @@ def Book_Ticket(uid):
     tcktno = int(input("Enter number of seats you want to book: "))
     print("\nTicket Classes:")
     print("1. AC TICKET   | 2. SL TICKET   | 3. GEN TICKET")
+    
     typ = int(input("Enter your choice of class (1/2/3): "))
     fare_query = {1: 'ac1_fare', 2: 'sl_fare', 3: 'gen_fare'}
     fare_type = fare_query.get(typ, 'gen_fare')
     con_cursor.execute(f"SELECT {fare_type} FROM train_details WHERE train_no = %s", (train_no,))
     fare_result = con_cursor.fetchone()
+    
     if not fare_result:
         print("Invalid train number or class selected.")
         return
@@ -190,3 +192,39 @@ def user_panel():
     else:
         print("Invalid choice. Please try again.")
         user_panel()
+def cancel_ticket():
+    connector= m.connect(host="localhost", user="root", password="root", database="trainreservation")
+    con_cursor = connector.cursor()
+    cancel_PNR = int(input("Enter the PNR number of the ticket you want to cancel: "))
+    con_cursor.execute("SELECT * FROM booked_tickets WHERE PNR = %s", (cancel_PNR,))
+    con_cursor.Commit()
+    
+    
+ 
+def user_panel():
+    print("\n--- User Panel ---")
+    login()
+    
+    if login != 0:
+        return 0
+    
+    
+    
+def admin_panel():
+    print("\n--- Admin Panel ---")
+    print("Admin Panel is not implemented yet.")
+    # You can add admin functionality here in the future
+
+def start_menu():
+    print("Welcome! Please choose your panel:")
+    print("1. User Panel")
+    print("2. Admin Panel")
+    choice = input("Enter 1 or 2: ")
+    if choice == '1':
+        user_panel()
+    elif choice == '2':
+        admin_panel()
+    else:
+        print("Invalid choice. Please restart the program.")
+
+start_menu()
