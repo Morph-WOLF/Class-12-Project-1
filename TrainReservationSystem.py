@@ -1,22 +1,14 @@
 import mysql.connector as m
 import random
-from getpass import getpass  # For secure password input
 
 # Database connection setup
-def get_db_connection():
-    """Establish and return a database connection"""
-    try:
-        return m.connect(
-            host="localhost",
-            user="root",
-            password="root",
-            database="trainreservation"
-        )
-    except m.Error as err:
-        print(f"Database connection error: {err}")
-        exit()
+connector = m.connect(
+    host="localhost",
+    user="root",
+    password="root",
+    database="trainreservation"
+)
 
-connector = get_db_connection()
 current_user = None
 
 # Weekdays dictionary
@@ -39,24 +31,15 @@ def register():
         print("\n=== Register New User ===")
         user_id = input("Enter username: ")
         
-        # Validate phone number
+        # Phone number validation
         while True:
-            try:
-                ph_no = int(input("Enter your phone number: "))
-                if len(str(ph_no)) != 10:
-                    print("Phone number must be 10 digits")
-                    continue
+            ph_no = input("Enter your phone number: ")
+            if ph_no.isdigit() and len(ph_no) == 10:
                 break
-            except ValueError:
-                print("Invalid input. Please enter numbers only.")
+            print("Phone number must be 10 digits")
         
-        # Password confirmation
-        while True:
-            pwd = getpass("Enter password: ")
-            confirm_pwd = getpass("Confirm password: ")
-            if pwd == confirm_pwd:
-                break
-            print("Passwords don't match. Try again.")
+        # Password handling (simplified)
+        pwd = input("Enter password: ")
         
         # Check if username exists
         con_cursor.execute("SELECT * FROM user_details WHERE user_id = %s", (user_id,))
@@ -85,7 +68,7 @@ def login():
         
         print("\n=== Login ===")
         user_id = input("Enter your user ID: ")
-        pwd = getpass("Enter your password: ")
+        pwd = input("Enter your password: ")
         
         con_cursor.execute(
             "SELECT * FROM user_details WHERE user_id = %s AND password = %s",
@@ -162,8 +145,9 @@ def book_ticket():
         
         # Get train number from user
         while True:
-            try:
-                train_no = int(input("\nEnter train number to book: "))
+            train_no = input("\nEnter train number to book: ")
+            if train_no.isdigit():
+                train_no = int(train_no)
                 # Verify train exists
                 selected_train = None
                 for train in available_trains:
@@ -175,7 +159,7 @@ def book_ticket():
                     break
                 else:
                     print("Invalid train number. Please try again.")
-            except ValueError:
+            else:
                 print("Please enter a valid number.")
         
         # Get ticket class
@@ -185,23 +169,19 @@ def book_ticket():
         print("3. GEN (Rs. {})".format(selected_train[8]))
         
         while True:
-            try:
-                class_choice = int(input("Enter class choice (1-3): "))
-                if 1 <= class_choice <= 3:
-                    break
-                print("Please enter 1, 2, or 3.")
-            except ValueError:
-                print("Invalid input. Please enter a number.")
+            class_choice = input("Enter class choice (1-3): ")
+            if class_choice in ['1', '2', '3']:
+                class_choice = int(class_choice)
+                break
+            print("Please enter 1, 2, or 3.")
         
         # Get number of tickets
         while True:
-            try:
-                num_tickets = int(input("Enter number of tickets: "))
-                if num_tickets > 0:
-                    break
-                print("Please enter a positive number.")
-            except ValueError:
-                print("Invalid input. Please enter a number.")
+            num_tickets = input("Enter number of tickets: ")
+            if num_tickets.isdigit() and int(num_tickets) > 0:
+                num_tickets = int(num_tickets)
+                break
+            print("Please enter a positive number.")
         
         # Get passenger details
         passengers = []
@@ -210,13 +190,11 @@ def book_ticket():
             name = input("Full name: ")
             
             while True:
-                try:
-                    age = int(input("Age: "))
-                    if age > 0:
-                        break
-                    print("Please enter a valid age.")
-                except ValueError:
-                    print("Invalid input. Please enter a number.")
+                age = input("Age: ")
+                if age.isdigit() and int(age) > 0:
+                    age = int(age)
+                    break
+                print("Please enter a valid age.")
             
             gender = input("Gender (M/F/O): ").upper()
             while gender not in ['M', 'F', 'O']:
@@ -306,7 +284,7 @@ def cancel_ticket():
         )
         connector.commit()
         
-        print("\nCancellation successful. Refund will be processed shortly.")
+        print("\nCancellation successful.")
         
     except m.Error as err:
         print(f"Database error during cancellation: {err}")
